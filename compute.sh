@@ -85,6 +85,9 @@ iscsi_helper=tgtadm
 auth_strategy=keystone
 keystone_ec2_url=http://${KEYSTONE_ENDPOINT}:5000/v2.0/ec2tokens
 
+# Cinder
+volume_api_class=nova.volume.cinder.API
+
 EOF
 
   sudo rm -f $NOVA_CONF

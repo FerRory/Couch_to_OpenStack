@@ -120,6 +120,10 @@ keystone service-create --name keystone --type identity --description 'OpenStack
 # Glance Image Service Endpoint
 keystone service-create --name glance --type image --description 'OpenStack Image Service'
 
+# Cinder Volume  Service Endpoint
+keystone service-create --name volume --type volume --description 'Volume Service'
+
+
 # Keystone OpenStack Identity Service
 KEYSTONE_SERVICE_ID=$(keystone service-list | awk '/\ keystone\ / {print $2}')
 
@@ -156,6 +160,15 @@ INTERNAL=$PUBLIC
 
 keystone endpoint-create --region RegionOne --service_id $EC2_SERVICE_ID --publicurl $PUBLIC --adminurl $ADMIN --internalurl $INTERNAL
 
+# Cinder API
+CINDER_SERVICE_ID=$(keystone service-list | awk '/\ cinder\ / {print $2}')
+CINDER_IP=`echo $MY_IP | sed 's/200/202/'`
+PUBLIC="http://$CINDER_IP:8776/v1/%(tenant_id)s"
+ADMIN=$PUBLIC
+INTERNAL=$PUBLIC
+
+keystone endpoint-create --region RegionOne --service_id $CINDER_SERVICE_ID --publicurl $PUBLIC --adminurl $ADMIN --internalurl $INTERNAL
+
 # Service Tenant
 keystone tenant-create --name service --description "Service Tenant" --enabled true
 
@@ -166,11 +179,14 @@ keystone user-create --name glance --pass glance --tenant_id $SERVICE_TENANT_ID 
 
 keystone user-create --name nova --pass nova --tenant_id $SERVICE_TENANT_ID --email nova@localhost --enabled true
 
+keystone user-create --name cinder --pass cinder --tenant_id $SERVICE_TENANT_ID --email cinder@localhost --enabled true
+
 # Get the admin role id
 ADMIN_ROLE_ID=$(keystone role-list | awk '/\ admin\ / {print $2}')
 KEYSTONE_USER_ID=$(keystone user-list | awk '/\ keystone\ / {print $2}')
 GLANCE_USER_ID=$(keystone user-list | awk '/\ glance\ / {print $2}')
 NOVA_USER_ID=$(keystone user-list | awk '/\ nova\ / {print $2}')
+CINDER_USER_ID=$(keystone user-list | awk '/\ cinder\ / {print $2}')
 
 # Assign the keystone user the admin role in service tenant
 keystone user-role-add --user $KEYSTONE_USER_ID --role $ADMIN_ROLE_ID --tenant_id $SERVICE_TENANT_ID
@@ -181,6 +197,8 @@ keystone user-role-add --user $GLANCE_USER_ID --role $ADMIN_ROLE_ID --tenant_id 
 # Assign the nova user the admin role in service tenant
 keystone user-role-add --user $NOVA_USER_ID --role $ADMIN_ROLE_ID --tenant_id $SERVICE_TENANT_ID
 
+# Assign the cinder user the admin role in service tenant
+keystone user-role-add --user $CINDER_USER_ID --role $ADMIN_ROLE_ID --tenant_id $SERVICE_TENANT_ID
 
 ###############################
 # Glance Install
@@ -382,6 +400,18 @@ sudo start nova-scheduler
 sudo start nova-objectstore
 sudo start nova-conductor
 
+
+######################
+# Chapter 4 CINDER   #
+######################
+
+# Create database
+MYSQL_ROOT_PASS=openstack
+MYSQL_CINDER_PASS=openstack
+
+mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e 'CREATE DATABASE cinder;'
+mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%'"
+mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "SET PASSWORD FOR 'cinder'@'%' = PASSWORD('$MYSQL_CINDER_PASS');"
 
 ###############################
 # OpenStack Deployment Complete
