@@ -121,7 +121,7 @@ keystone service-create --name keystone --type identity --description 'OpenStack
 keystone service-create --name glance --type image --description 'OpenStack Image Service'
 
 # Cinder Volume  Service Endpoint
-keystone service-create --name volume --type volume --description 'Volume Service'
+keystone service-create --name cinder --type volume --description 'Volume Service'
 
 
 # Keystone OpenStack Identity Service
@@ -410,7 +410,7 @@ MYSQL_ROOT_PASS=openstack
 MYSQL_CINDER_PASS=openstack
 
 mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e 'CREATE DATABASE cinder;'
-mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%'"
+mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%';"
 mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "SET PASSWORD FOR 'cinder'@'%' = PASSWORD('$MYSQL_CINDER_PASS');"
 
 ###############################

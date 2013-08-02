@@ -34,8 +34,7 @@ EOF
   sudo chown cinder:cinder $CINDER_CONF
 
 
-sudo sed -i "s/service_host = 127.0.0.1/service_host = '$MY_IP'/g" $CINDER_API_PASTE
-sudo sed -i "s/auth_host = 127.0.0.1/auth_host = '$MYSQL_HOST'/g" $CINDER_API_PASTE
+sudo sed -i 's/127.0.0.1/'${CONTROLLER_HOST}'/g' $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_TENANT_NAME%/'service'/g" $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_USER%/cinder/g" $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_PASSWORD%/openstack/g" $CINDER_API_PASTE
