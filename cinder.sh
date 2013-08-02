@@ -37,7 +37,7 @@ EOF
 sudo sed -i 's/127.0.0.1/'${CONTROLLER_HOST}'/g' $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_TENANT_NAME%/'service'/g" $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_USER%/cinder/g" $CINDER_API_PASTE
-sudo sed -i "s/%SERVICE_PASSWORD%/openstack/g" $CINDER_API_PASTE
+sudo sed -i "s/%SERVICE_PASSWORD%/cinder/g" $CINDER_API_PASTE
 
 sudo sed -i '    s/filter = \[ \"a\/\.\*\/\" \]/filter = [ \"a\/sda1\/\"\, \"a\/sdb1\/\", \"r\/\.\*\/\"]/' /etc/lvm/lvm.conf
 
