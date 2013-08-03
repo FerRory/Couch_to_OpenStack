@@ -163,7 +163,7 @@ keystone endpoint-create --region RegionOne --service_id $EC2_SERVICE_ID --publi
 # Cinder API
 CINDER_SERVICE_ID=$(keystone service-list | awk '/\ cinder\ / {print $2}')
 CINDER_IP=`echo $MY_IP | sed 's/200/202/'`
-PUBLIC="http://$CINDER_IP:8776/v1/%(tenant_id)s"
+PUBLIC="http://$CINDER_IP:8776/v2/%(tenant_id)s"
 ADMIN=$PUBLIC
 INTERNAL=$PUBLIC
 
@@ -412,6 +412,7 @@ MYSQL_CINDER_PASS=openstack
 mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e 'CREATE DATABASE cinder;'
 mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%';"
 mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "SET PASSWORD FOR 'cinder'@'%' = PASSWORD('$MYSQL_CINDER_PASS');"
+mysql -uroot -p$MYSQL_ROOT_PASS -h localhost -e "FLUSH PRIVILEGES;"
 
 ###############################
 # OpenStack Deployment Complete

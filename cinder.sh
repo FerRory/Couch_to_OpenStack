@@ -35,13 +35,38 @@ EOF
 
 
 sudo sed -i 's/127.0.0.1/'${CONTROLLER_HOST}'/g' $CINDER_API_PASTE
-sudo sed -i "s/%SERVICE_TENANT_NAME%/'service'/g" $CINDER_API_PASTE
+sudo sed -i "s/%SERVICE_TENANT_NAME%/service/g" $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_USER%/cinder/g" $CINDER_API_PASTE
 sudo sed -i "s/%SERVICE_PASSWORD%/cinder/g" $CINDER_API_PASTE
+sudo sed -i "s/%SERVICE_PASSWORD%/cinder/g" $CINDER_API_PASTE
+sudo sed -i "s/^signing_dir/#signing_dir/" $CINDER_API_PASTE
 
-sudo sed -i '    s/filter = \[ \"a\/\.\*\/\" \]/filter = [ \"a\/sda1\/\"\, \"a\/sdb1\/\", \"r\/\.\*\/\"]/' /etc/lvm/lvm.conf
+sudo sed -i '    s/filter = \[ \"a\/\.\*\/\" \]/filter = [ \"a\/loop\/\"\, \"a\/sdb1\/\", \"r\/\.\*\/\"]/' /etc/lvm/lvm.conf
 
 sudo sh -c "echo 'include $volumes_dir/*' >> /etc/tgt/conf.d/cinder.conf"
+sudo sh -c "echo 'include /etc/tgt/conf.d/cinder_tgt.conf
+include /etc/tgt/conf.d/cinder.conf
+default-driver iscsi' > /etc/tgt/targets.conf"
 
 sudo restart tgt
 sudo cinder-manage db sync
+
+cd /home
+dd if=/dev/zero of=cinder-volumes bs=1 count=0 seek=2G
+sudo losetup /dev/loop2 cinder-volumes
+sudo sh -c "echo 'n
+p
+1
+
+
+t
+8e
+w
+'|fdisk /dev/loop2"
+sudo pvcreate /dev/loop2
+sudo vgcreate cinder-volumes /dev/loop2
+sudo pvscan
+
+sudo service cinder-volume restart
+sudo service cinder-api restart
+sudo service cinder-scheduler restart
